@@ -1,0 +1,6 @@
+*.drawio
+/old_code/
+__pycache__/
+*.ipynb
+*.csv
+*.db
