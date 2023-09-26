@@ -1,4 +1,4 @@
-from service.instructions import Instruction, perform_instructions, driver
+from service import perform_instructions, driver, Instruction
 
 def register(
         email: str,
@@ -70,5 +70,5 @@ def login(
         instructions=Instructions
     )
 
-# result = register('twoja.mama@mymailbox.xxl.st')
+result = register('twoja.mama@mymailbox.xxl.st')
 # print(f"Registration {'succeeded' if result else 'failed'}")
