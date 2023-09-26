@@ -1,6 +1,6 @@
 from service import perform_instructions, driver, Instruction
 
-def register(
+def create_account(
         email: str,
 ):
     """
@@ -43,8 +43,8 @@ def register(
     )
 
 
-
-def login(
+# ! maybe consider creating custom class for info -> later use as (WoltData.url, WoltData.country, ...) 
+def register(
     url: str,
     country: str = None,
     first_name: str = None,

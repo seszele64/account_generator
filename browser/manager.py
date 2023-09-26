@@ -2,11 +2,11 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
-# from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-# from random_user_agent.user_agent import UserAgent
-# from random_user_agent.params import SoftwareName, OperatingSystem, Popularity, HardwareType
+from random_user_agent.user_agent import UserAgent
+from random_user_agent.params import SoftwareName, OperatingSystem, Popularity, HardwareType
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium.webdriver.chrome.service import Service
 
@@ -47,7 +47,7 @@ class Browser():
 
         # ---------------------------------- driver ---------------------------------- #
         # create browser -> autoinstalled chrome
-        self.driver = self.create_driver()
+        # self.driver = self.create_driver()
 
     # ---------------------------------- methods --------------------------------- #
 
@@ -69,8 +69,11 @@ class Browser():
     def create_driver(self) -> webdriver.Chrome:
         # , proxy=self.proxy)
         service = Service(ChromeDriverManager().install())
-
         return webdriver.Chrome(service=service, options=self.options)
+    
+    # add options
+    def add_options(self, options: Options):
+        self.options.add_argument(options)
 
     # # ------------------------------ static methods ------------------------------ #
 

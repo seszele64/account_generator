@@ -3,12 +3,15 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.os_manager import ChromeType
+import json
 
-chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument("--start-maximized")
-driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+# ! move it to browser module
+import sys
+sys.path.append(".") # Adds higher directory to python modules path.
+from browser.manager import Browser
+browser = Browser()
+browser.add_options("--start-maximized")
+driver = browser.create_driver()
 
 # Import the “Select” package
 from selenium.webdriver.support.ui import Select
