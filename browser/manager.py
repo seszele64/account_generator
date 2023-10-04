@@ -39,6 +39,7 @@ class Browser():
 
         # add user agent to options
         self.options.add_argument(f'user-agent={self.random_user_agent}')
+        self.options.add_argument("--start-maximized")
 
         # ----------------------------------- proxy ---------------------------------- #
         # self.proxy_server = self.create_proxy_server()
@@ -75,14 +76,5 @@ class Browser():
     def add_options(self, options: Options):
         self.options.add_argument(options)
 
-    # # ------------------------------ static methods ------------------------------ #
-
-    # @staticmethod
-    # def create_proxy_server() -> Server:
-    #     # anaconda path to /home/gr00stl/anaconda3/lib/python3.9/site-packages/browsermobproxy/browsermob-proxy-2.1.4/bin/browsermob-proxy
-    #     server = Server(
-    #         "/home/gr00stl/anaconda3/lib/python3.9/site-packages/browsermobproxy/browsermob-proxy-2.1.4/bin/browsermob-proxy"
-    #     )
-
-    #     server.start()
-    #     return server
+# create global variable -> global_browser
+global_browser = Browser().create_driver()
