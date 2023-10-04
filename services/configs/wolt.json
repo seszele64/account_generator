@@ -1,0 +1,85 @@
+{
+  "create_account": {
+      "instructions": {
+          "visit_page": {
+              "type": "navigate",
+              "url": "https://wolt.com/en/"
+          },
+          "click_button1": {
+              "type": "click",
+              "xpath": "/html/body/div[5]/div/div/div/button[2]/div[3]"
+          },
+          "click_button2": {
+              "type": "click",
+              "xpath": "/html/body/div[2]/div[2]/div/header/div[2]/div[3]/div/div/button"
+          },
+          "input_email": {
+              "type": "input",
+              "xpath": "//*[@id='method-select-email']",
+              "input_value": "{email}"
+          },
+          "click_next_button": {
+              "type": "click",
+              "xpath": "/html/body/div[7]/div/aside/div[2]/div/div[1]/div/div/div[2]/form/button/div[3]"
+          },
+          "wait_for_button_resend_mail": {
+              "type": "wait",
+              "xpath": "/html/body/div[7]/div/aside/div[4]/div/div[1]/div/div/button/div[3]"
+          }
+      }
+  },
+  "register": {
+    "instructions": {
+        "visit_page": {
+            "type": "navigate",
+            "url": "{url}"
+        },
+        "confirm_cookies": {
+            "type": "click",
+            "xpath": "/html/body/div[5]/div/div/div/button[2]"
+        },
+        "confirm_not_bot": {
+            "type": "click",
+            "xpath": "//*[@id='mainContent']/div/button",
+            "skippable": true
+        },
+        "select_country": {
+            "type": "select",
+            "xpath": "/html/body/div[6]/div/aside/div[2]/div/div[1]/div/div/form/div[2]/label/select",
+            "select_value": "{country}"
+        },
+        "input_first_name": {
+            "type": "input",
+            "xpath": "//*[@id='create-account-first-name']",
+            "input_value": "{first_name}"
+        },
+        "input_last_name": {
+            "type": "input",
+            "xpath": "//*[@id='create-account-last-name']",
+            "input_value": "{last_name}"
+        },
+        "select_country_code": {
+            "type": "select",
+            "xpath": "/html/body/div[6]/div/aside/div[2]/div/div[1]/div/div/form/div[4]/div[1]/label/select",
+            "select_value": "{country_code}"
+        },
+        "input_phone_number": {
+            "type": "input",
+            "xpath": "//*[@id='create-account-phone-number']",
+            "input_value": "{phone_number}"
+        },
+        "input_referral_code": {
+            "type": "input",
+            "xpath": "//*[@id='create-account-referral-code']",
+            "input_value": "{referral_code}"
+        },
+        "personal_data_consent": {
+            "type": "click",
+            "xpath": "/html/body/div[6]/div/aside/div[2]/div/div[1]/div/div/form/div[6]"
+        },
+        "click_continue_button": {
+            "type": "click",
+            "xpath": "/html/body/div[6]/div/aside/div[2]/div/div[1]/div/div/form/button"
+        }
+    }}
+}

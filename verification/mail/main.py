@@ -11,6 +11,14 @@ def create_mail_address(
 ) -> str:
     return f"{name}.{surname}@{domain}"
 
+def create_mail_addres_from_name(
+        name: 'Name'
+):
+    return create_mail_address(
+        name=name.first_name,
+        surname=name.last_name
+    )
+
 
 # look for link in mail
 def check_link_inbox(

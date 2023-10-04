@@ -7,19 +7,21 @@
 
 # random_info
 from random_info import create_person
-
-# real info
-
-from database import table
+from data.random_info import (
+    
 
 
 # --------------------------------- SERVICES --------------------------------- #
 
-# mail
-from mail
-
-# phone
-from phone import api
+# verification
+from verification import (
+    #mail
+    create_mail_address,
+    check_link_inbox,
+    # phone
+    get_phone_number,
+    get_verification_code
+)
 
 # asynchronic programming
 import asyncio
@@ -36,3 +38,4 @@ q = queue.Queue()
 
 # create person
 person = create_person()
+

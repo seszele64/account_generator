@@ -54,9 +54,3 @@ class ServiceRegistry:
 
 # register new service
 ServiceRegistry.register_service('wolt', (r'https://wolt.com/me/magic_login[^"]*', r'https://wolt.com/me/magic_login[^"]*'))
-
-
-
-
-
-    

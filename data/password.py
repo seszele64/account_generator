@@ -13,27 +13,16 @@ class CharacterLimits:
         self.max = max
         self.min = min
 
-class Limits:
-
-    length: CharacterLimits = None
-    uppercase: CharacterLimits = None
-    lowercase: CharacterLimits = None
-    numbers: CharacterLimits = None
-    special: CharacterLimits = None
-
-    def __init__(self, length=None, uppercase=None, lowercase=None, numbers=None, special=None):
-        self.length = length
-        self.uppercase = uppercase
-        self.lowercase = lowercase
-        self.numbers = numbers
-        self.special = special
-
 # random string generator
 class RandomString(
     ):
     
-    def __init__(self, limits):
-        self.limits: Limits = limits
+    def __init__(self, length=None, uppercase=None, lowercase=None, numbers=None, special=None):
+        self.length = CharacterLimits(*length)
+        self.uppercase = CharacterLimits(*uppercase)
+        self.lowercase = CharacterLimits(*lowercase)
+        self.numbers = CharacterLimits(*numbers)
+        self.special = CharacterLimits(*special)
 
     # call -> reproduces string
     def __call__(self):
@@ -45,26 +34,26 @@ class RandomString(
 
     # Function to generate uppercase characters
     def generate_uppercase(self):
-        return self.generate_random_characters(string.ascii_uppercase, self.limits.uppercase.min)
-        # return ''.join(random.choices(string.ascii_uppercase, k=self.limits.uppercase.min))
+        return self.generate_random_characters(string.ascii_uppercase, self.uppercase.min)
+        # return ''.join(random.choices(string.ascii_uppercase, k=self.uppercase.min))
     
     # Function to generate lowercase characters
     def generate_lowercase(self):
-        # return ''.join(random.choices(string.ascii_lowercase, k=self.limits.lowercase.min))
-        return self.generate_random_characters(string.ascii_lowercase, self.limits.lowercase.min)
+        # return ''.join(random.choices(string.ascii_lowercase, k=self.lowercase.min))
+        return self.generate_random_characters(string.ascii_lowercase, self.lowercase.min)
 
     # Function to generate numbers
     def generate_numbers(self):
-        # return ''.join(random.choices(string.digits, k=self.limits.numbers.min))
-        return self.generate_random_characters(string.digits, self.limits.numbers.min)
+        # return ''.join(random.choices(string.digits, k=self.numbers.min))
+        return self.generate_random_characters(string.digits, self.numbers.min)
 
     # Function to generate special characters
     def generate_special(self):
         # no spaces
-        special_characters = random.choices(string.punctuation.replace(' ', ''), k=self.limits.special.min)
+        special_characters = random.choices(string.punctuation.replace(' ', ''), k=self.special.min)
         
         while any(char in special_characters for char in ['"', "'", '\\']):
-            special_characters = random.choices(string.punctuation.replace(' ', ''), k=self.limits.special.min)
+            special_characters = random.choices(string.punctuation.replace(' ', ''), k=self.special.min)
 
         return ''.join(special_characters)
     
@@ -89,31 +78,20 @@ class RandomString(
     
     # length adjuster
 
-    ## check length
-    def check_length(self, string):
-
-        if len(string) < self.limits.length.min:
-            return False
-        elif len(string) > self.limits.length.max:
-            return False
-        else:
-            return True
-
-    ## adjust length helper
-    def adjust_length_helper(self, string):
-        if len(string) < self.limits.length.min:
-            return string + self.generate_random_string()
-        elif len(string) > self.limits.length.max:
-            return string[:-1].join(random.sample(string[:-1], len(string[:-1])))
-        else:
-            return string
-
     def adjust_length(self, string):
-
         while not self.check_length(string):
-            string = self.adjust_length_helper(string)
+            if len(string) < self.length.min:
+                string += self.generate_random_string()
+            elif len(string) > self.length.max:
+                string = string[:self.length.max]
+                break
         return string
-        
+
+
+
+    def check_length(self, string):
+        return self.length.min <= len(string) <= self.length.max
+
     # generate random string that matches the limits
     def generate(self):
         # Generate random password
@@ -126,4 +104,4 @@ class RandomString(
         password = self.adjust_length(password)
 
         return password
-
+    
