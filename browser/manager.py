@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -11,35 +11,29 @@ from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium.webdriver.chrome.service import Service
 
 
-class Browser():
+# import sister module -> /data/real_info/user_agent.py
+from data.real_info.user_agent import UserAgentManager
 
+class MyBrowser(webdriver.Chrome):
     # -------------------------------- constructor ------------------------------- #
 
-    def __init__(self):
+    def __init__(self, options: Options = None):
 
         # ---------------------------------- options --------------------------------- #
         # create options
-        self.options = Options()
+        if options is None:
+            self.options = Options()
 
         # add headless mode
         # self.options.add_argument('--headless')
+        self.options.add_argument("--start-maximized")
 
         # -------------------------------- user agent -------------------------------- #
-        # create user agent rotator
-        self.user_agent_rotator = UserAgent()
 
-        # set user agent parameters -> software_names, operating_systems, popularity, hardware_type
-        self.software_names = [SoftwareName.CHROME.value]
-        self.operating_systems = [OperatingSystem.WINDOWS.value]
-        self.popularity = [Popularity.POPULAR.value]
-        self.hardware_type = [HardwareType.COMPUTER.value]
-
-        # get random user agent
-        self.random_user_agent = self.get_random_user_agent()
-
+        self.user_agent = UserAgentManager().get_random_user_agent()
+        
         # add user agent to options
-        self.options.add_argument(f'user-agent={self.random_user_agent}')
-        self.options.add_argument("--start-maximized")
+        self.options.add_argument(f'user-agent={self.user_agent}')
 
         # ----------------------------------- proxy ---------------------------------- #
         # self.proxy_server = self.create_proxy_server()
@@ -76,5 +70,10 @@ class Browser():
     def add_options(self, options: Options):
         self.options.add_argument(options)
 
+    # -------------------------- quicker browser actions ------------------------- #
+
 # create global variable -> global_browser
-global_browser = Browser().create_driver()
+global_browser = MyBrowser().create_driver()
+
+# global user agent
+global_user_agent = MyBrowser().user_agent

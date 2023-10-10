@@ -5,3 +5,5 @@ __pycache__/
 *.csv
 *.db
 *.log
+*.html
+.env

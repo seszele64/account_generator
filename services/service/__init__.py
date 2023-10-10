@@ -1,6 +1,8 @@
-from service.main import Service, ServiceTasks
+from .main import Service
+from .actions import ActionType, Actions
 
-all = [
+__all__ = [
     "Service",
-    "ServiceTasks"
+    "ActionType",
+    "Actions"
 ]

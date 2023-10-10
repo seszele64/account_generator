@@ -1,1 +1,1 @@
-from .scraper import Yopmail, YopmailHTML
+from .scraper import YopmailScraper, YopmailManager

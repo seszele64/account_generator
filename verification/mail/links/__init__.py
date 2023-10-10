@@ -1,0 +1,1 @@
+from .main import get_link_from_mail

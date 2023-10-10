@@ -6,17 +6,13 @@ import string
 
 class CharacterLimits:
 
-    max: int = None
-    min: int = None
-
-    def __init__(self, max=None, min=None):
+    def __init__(self, max, min):
         self.max = max
         self.min = min
 
 # random string generator
-class RandomString(
+class RandomStringManager(
     ):
-    
     def __init__(self, length=None, uppercase=None, lowercase=None, numbers=None, special=None):
         self.length = CharacterLimits(*length)
         self.uppercase = CharacterLimits(*uppercase)
@@ -105,3 +101,13 @@ class RandomString(
 
         return password
     
+
+# call -> reproduces string
+def get_random_string(length=(8, 16), uppercase=(1, 4), lowercase=(1, 4), numbers=(1, 4), special=(1, 4)):
+    return RandomStringManager(
+        length=length,
+        uppercase=uppercase,
+        lowercase=lowercase,
+        numbers=numbers,
+        special=special
+    ).generate()

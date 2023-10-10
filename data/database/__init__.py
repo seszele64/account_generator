@@ -1,3 +1,6 @@
-from .database_manager import DatabaseManager, Person
+from .main import conn, cursor
 
-table = DatabaseManager()
+__all__ = [
+    'conn',
+    'cursor'
+]

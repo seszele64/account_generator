@@ -1,10 +1,10 @@
 # manage mail -> mailactions
 from .main import (
-    create_mail_address,
-    check_link_inbox
+    check_link_inbox,
+    create_mail_addres
 )
 
 __all__ = [
-    "create_mail_address",
-    "check_link_inbox"
+    'check_link_inbox',
+    'create_mail_addres'
 ]

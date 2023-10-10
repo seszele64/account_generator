@@ -6,9 +6,8 @@ import string
 import random
 from bs4 import BeautifulSoup
 
-# import local
-# from browser_manager import *
-
+from typing import Optional
+from random_user_agent.user_agent import UserAgent
 
 class YopmailHTML:
 
@@ -31,32 +30,35 @@ class YopmailHTML:
     def __repr__(self):
         return self.html
 
-
-class Yopmail:
-    # initialize yopmail object that will be used to get mails
-    def __init__(self, username, proxies=None):
-        if not re.compile("^[-a-zA-Z0-9@_.+]{1,}$").match(username):
-            raise ValueError("Username is not valid")
-        self.username = username.split('@')[0]
-        self.url = 'https://yopmail.com/en/'
-        self.session = requests.Session()
-        self.jar = requests.cookies.RequestsCookieJar()
-        self.proxies = proxies
-
-        # Yopmail needed parameters:
+class YopmailScraper:
+    def __init__(self, username: str, proxies: Optional[dict[str, str]] = None, user_agent: Optional[str] = None):
+        self.username = username
+        self.url = 'https://yopmail.com/'
         self.yp = None
         self.yj = None
         self.ycons = None
         self.ytime = None
+        self.jar = requests.cookies.RequestsCookieJar()
+        self.session = requests.Session()
+        self.proxies = proxies
+        self.user_agent = user_agent
 
-    # send request to yopmail.com with set of parameters, cookies and proxies
+    def request(self, url: str, params: Optional[dict[str, str]] = None, context: Optional[str] = None, headers: Optional[dict[str, str]] = None) -> requests.models.Response | None:
+        """Make a request to yopmail.com
 
-    def request(self, url: str, params=None, proxies=None, context: str = None) -> requests.models.Response | None:
-        proxies = proxies if proxies is not None else self.proxies
+        Args:
+            url (str): url to request
+            params (dict[str, str], optional): parameters to include in the request. Defaults to None.
+            context (str, optional): context of the request. Defaults to None.
+            headers (dict[str, str], optional): headers to include in the request. Defaults to None.
+
+        Returns:
+            requests.models.Response | None: response object or None if request failed
+        """
         try:
             if self.yp is None:
                 context = 'yp'
-                req = self.session.get(self.url, proxies=proxies)
+                req = self.session.get(self.url, proxies=self.proxies)
                 if not req:
                     return None
                 self.extract_yp(req)
@@ -65,7 +67,7 @@ class Yopmail:
             if self.yj is None:
                 context = 'yj'
                 req = self.session.get(
-                    'https://yopmail.com/ver/5.0/webmail.js', proxies=proxies)
+                    'https://yopmail.com/ver/5.0/webmail.js', proxies=self.proxies)
                 if not req:
                     return None
                 self.extract_yj(req)
@@ -75,11 +77,11 @@ class Yopmail:
                 context = 'ycons'
                 # Set consent cookies
                 req = self.session.get(
-                    'https://yopmail.com/consent?c=deny', proxies=proxies)
+                    'https://yopmail.com/consent?c=deny', proxies=self.proxies)
                 if not req:
                     return None
             self.add_ytime()
-            return self.session.get(url, params=params, cookies=self.jar, proxies=proxies)
+            return self.session.get(url, params=params, cookies=self.jar, proxies=self.proxies, headers={'User-Agent': self.user_agent})
 
         # Error handling
         except requests.exceptions.ProxyError as err:
@@ -116,7 +118,7 @@ class Yopmail:
         match = YJ_RE.search(req.text)
         self.yj = match.groups()[0]
 
-    def get_inbox(self, page=1, proxies=None) -> requests.models.Response | None:
+    def get_inbox(self, page=1) -> requests.models.Response | None:
 
         params = {
             'login': self.username,
@@ -133,15 +135,15 @@ class Yopmail:
             # 'scrl': '',
             # 'yf': '005',
         }
-        return self.request(f'{self.url}inbox', params=params, proxies=proxies, context='inbox')
+        return self.request(f'{self.url}inbox', params=params, context='inbox', headers={'User-Agent': self.user_agent})
 
-    def get_mail_ids(self, page=1, proxies=None) -> list | None:
+    def get_mail_ids(self, page=1) -> list | None:
         # We're looking for mail ids:
-        if req := self.get_inbox(page=page, proxies=proxies):
+        if req := self.get_inbox(page=page):
             bs = BeautifulSoup(req.text, 'html.parser')
             return [mail["id"] for mail in bs.find_all('div', {'class': 'm'})]
 
-    def get_mail_body(self, mail_id: int, show_image=False, proxies=None) -> YopmailHTML:
+    def get_mail_body(self, mail_id: int, show_image=False) -> YopmailHTML:
         if show_image:
             mail_id = f'i{mail_id}'
         else:
@@ -151,9 +153,48 @@ class Yopmail:
             # mail_id "{'i' to show images || 'm' to don't}e_ZGpjZGV1ZwRkZwD0ZQNjAmx0AmpkAj=="
             'id': mail_id
         }
-        req = self.request(f'{self.url}mail', params=params,
-                           proxies=proxies, context='mail body')
+        req = self.request(f'{self.url}mail', params=params, context='mail body', headers={'User-Agent': self.user_agent})
         mail_html = str(BeautifulSoup(
             req.text, 'html.parser').find('div', {'id': 'mail'}))
         return YopmailHTML(mail_html, self.username, mail_id)
 
+    # read newest mail
+    def read_newest_mail(self) -> YopmailHTML:
+        mail_ids = self.get_mail_ids()
+        if mail_ids:
+            return self.get_mail_body(mail_ids[-1])
+        return None
+
+class YopmailManager:
+
+    def __init__(self, proxies: Optional[dict[str, str]] = None):
+        self.proxies = proxies
+        self.user_agent_rotator = UserAgent()
+
+    # set user agent
+    def get_random_user_agent(self) -> str:
+        return self.user_agent_rotator.get_random_user_agent()
+    
+    # create headers
+    def get_headers(self, user_agent: Optional[str] = None) -> dict[str, str]:
+        return {'User-Agent': user_agent or self.get_random_user_agent()}
+
+    def get_newest_mail_for_username(self, username: str, proxies: Optional[dict[str, str]] = None) -> YopmailHTML:
+        return YopmailScraper(username, proxies, self.get_random_user_agent()).read_newest_mail()
+    
+    def get_inbox_for_username(self, username: str, proxies: Optional[dict[str, str]] = None) -> requests.models.Response | None:
+        return YopmailScraper(username, proxies, self.get_random_user_agent()).get_inbox()
+
+    # get today's domain -> https://yopmail.com/domain?d=list
+    def get_todays_domain(self, proxies=None, user_agent = None) -> list | None:
+
+        # send request
+        req = requests.get('https://yopmail.com/en/domain?d=list', proxies=proxies, headers=self.get_headers())
+        bs = BeautifulSoup(req.text, 'html.parser')
+
+        # get options under /html/body/select/optgroup[1]
+        options = bs.find_all('optgroup')[0].find_all('option')
+        return random.choice(options).text
+    
+    def get_mail_address_with_todays_domain(self, name: str, surname: str, proxies: Optional[dict[str, str]] = None) -> str:
+        return f"{name}.{surname}{self.get_todays_domain(proxies=proxies)}"

@@ -3,63 +3,58 @@ import re
 from dataclasses import dataclass
 # datetime
 from datetime import datetime
+from typing import Any
 from fng_api import *
 import pycountry
 
-
-countries = {country.alpha_2 for country in pycountry.countries}
+# ----------------------- sub constituents of a person ----------------------- #
 
 class Street:
-    name: str = None
-    number: str = None
 
-    def __init__(self, name: str = None, number: str = None):
-        self.name = name
-        self.number = number
+    def __init__(self, data):
+        self.data = data
+        self.name, self.number = self.parse_address()
 
-    def parse_address(self) -> tuple:
-        pattern = r'^(\d+)\s+(.+)'
-        if not (match := re.match(pattern, self)):
-            raise ValueError(f'Invalid address: {self}')
-        street_number = match[1]
-        street_name = match[2]
-        return Street(street_name, street_number)
+    def parse_address(self) -> 'Street':
+        # street number
+        street_number_pattern = r'(\d+)\s+'
+        # street name
+        street_name_pattern = r'\d+\s+(.+?),'
+        street_name = re.search(street_name_pattern, self.data).group(1)
+        street_number = re.search(street_number_pattern, self.data).group(1)
+        return street_name, street_number
 
 class Address:
     def __init__(self, street: Street, zip_code: str, city: str):
-        self.street = street
+        
+        self.street = self.parse_street(street)
         self.zip_code = zip_code
         self.city = city
 
-    class AddressRegex:
-        def __init__(self, street_name: re.Pattern, street_number: re.Pattern, zip_code: re.Pattern, city: re.Pattern):
-            self.street_name = street_name
-            self.street_number = street_number
-            self.zip_code = zip_code
-            self.city = city
-
-
-    def parse(self, address_regex: 'AddressRegex') -> 'Address':
-        return Address(
-            street=Street(
-                name=address_regex.street_name.search(self.street.name).group(),
-                number=address_regex.street_number.search(self.street.number).group()
-            ),
-            zip_code=address_regex.zip_code.search(self.zip_code).group(),
-            city=address_regex.city.search(self.city).group()
-        )
+    def parse_street(self, street: str) -> 'Street':
+        return Street(street)
+    
+    def __str__(self) -> str:
+        print(f"Address(street={self.street}, zip_code={self.zip_code}, city={self.city})")
 
 class Name:
-    def __init__(self, first_name: str = None, last_name: str = None):
-        self.first_name = first_name
-        self.last_name = last_name
 
-    def parse(self, name: str) -> 'Name':
-        pattern = r'^(\w+) (\w+)$'
-        if not (match := re.match(pattern, name)):
-            raise ValueError(f'Invalid name: {name}')
-        first_name, last_name = match[1], match[2]
-        return Name(first_name, last_name)
+    def __init__(self, data: str):
+        self.data = data
+        self.first, self.last = self.parse()
+
+    def parse(self):
+        # parse Word + space + Word to two words
+        # find first word -> before space
+        first_name_pattern = r'(.+)\s'
+        first_name = re.search(first_name_pattern, self.data).group(1)
+
+        # find last word -> after space
+        last_name_pattern = r'\s(.+)'
+        last_name = re.search(last_name_pattern, self.data).group(1)
+
+        return first_name, last_name
+
 
 class Company:
     def __init__(self, name: str = None, occupation: str = None):
@@ -71,6 +66,9 @@ class Contact:
         self.phone = phone
         self.email = email
 
+# ------------------------------------- < ------------------------------------ #
+
+
 class Person:
     def __init__(self, name: Name = None, birthdate: datetime = None, company: Company = None, contact: Contact = None, address: Address = None):
         self.name = name
@@ -79,50 +77,63 @@ class Person:
         self.contact = contact
         self.address = address
 
+    def from_random_data(self, identity: getIdentity) -> 'Person':
+        """
+        Parses random data from the provided identity and address regex and returns a Person object.
+
+        Args:
+            identity (getIdentity.identity): The identity object containing random data.
+            address_regex (Address.AddressRegex): The address regex object for parsing the address.
+
+        Returns:
+            Person: A Person object with parsed random information.
+                - name (Name): The parsed Name object.
+                - birthdate (datetime): The parsed birthdate.
+                - company (Company): The parsed Company object.
+                - contact (Contact): The parsed Contact object.
+                - address (Address): The parsed Address object.
+
+        Example:
+            ```python
+            identity = getIdentity.identity(...)
+            address_regex = Address.AddressRegex(...)
+            parse_random_data(identity, address_regex)
+            ```
+        """
+        return Person(
+            name=Name(identity.name),
+            birthdate=datetime.strptime(identity.birthday, '%B %d, %Y'),
+            company=Company(identity.company, identity.occupation),
+            contact=Contact(identity.phone, identity.email),
+            address=Address(identity.address, identity.zip, identity.city)
+        )
+
     def __str__(self) -> str:
         return f'''Person(
-    name=Name('{self.name.first_name}', '{self.name.last_name}'),
+    name=Name('{self.name.first}', '{self.name.last}'),
     birthdate=Birthdate('{self.birthdate}'),
     company=Company('{self.company.name}', '{self.company.occupation}'),
     contact=Contact('{self.contact.phone}', '{self.contact.email}'),
-    address=Address('{self.address.street_name}', '{self.address.street_number}', '{self.address.zip_code}', '{self.address.city}')
+    address=Address('{self.address.street.name}', '{self.address.street.number}', '{self.address.zip_code}', '{self.address.city}')
     )'''
 
 # ------------------------------- create person ------------------------------ #
 
-def parse_random_data(identity: getIdentity.identity,
-                      address_regex: 'Address.AddressRegex') -> Person:
-    
-    """
-    Parses random data from the provided identity and address regex and returns a Person object.
 
-    Args:
-        identity (getIdentity.identity): The identity object containing random data.
-        address_regex (Address.AddressRegex): The address regex object for parsing the address.
+def get_country_list() -> list:
+
+    """
+    Returns a list of country codes.
 
     Returns:
-        Person: A Person object with parsed random information.
-            - name (Name): The parsed Name object.
-            - birthdate (datetime): The parsed birthdate.
-            - company (Company): The parsed Company object.
-            - contact (Contact): The parsed Contact object.
-            - address (Address): The parsed Address object.
+        list: A list of country codes.
 
     Example:
         ```python
-        identity = getIdentity.identity(...)
-        address_regex = Address.AddressRegex(...)
-        parse_random_data(identity, address_regex)
+        get_country_list()
         ```
     """
-
-    return Person(
-        name=Name.parse(identity.name),
-        birthdate=datetime.strptime(identity.birthday, '%B %d, %Y'),
-        company=Company(identity.company, identity.occupation),
-        contact=Contact(identity.phone, identity.email),
-        address=Address.parse(address_regex),
-    )
+    return [country.lower() for country in {country.alpha_2 for country in pycountry.countries}]
 
 # create person
 def create_person(country_list: list = None) -> Person:
@@ -149,16 +160,11 @@ def create_person(country_list: list = None) -> Person:
     
     if country_list is None:
         country_list = ['pl']
+    if not isinstance(country_list, list):
+        raise TypeError(f"country_list must be of type list, not {type(country_list)}")
+    # check if countries in country_list belong in pycountry
+    for country in country_list:
+        if country not in get_country_list():
+            raise ValueError(f"Invalid country: {country}")
 
-    # Identity
-    identity = getIdentity(country_list)
-
-    # Address
-    addres_regex = Address.AddressRegex(
-        street_name = re.compile(r'(.+)'),
-        street_number = re.compile(r'(\d+)'),
-        zip_code = re.compile(r'(\d+)'),
-        city = re.compile(r'(.+)'),
-    )
-
-    return parse_random_data(identity, addres_regex)
+    return Person().from_random_data(getIdentity(country_list))

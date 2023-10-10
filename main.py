@@ -3,20 +3,15 @@
 
 # imports from random_info package -> __init__.py
 
-# ----------------------------------- INFO ----------------------------------- #
+# ----------------------------------- data ----------------------------------- #
 
-# random_info
-from random_info import create_person
-from data.random_info import (
-    
-
+from data import create_person, get_random_string, random_user_agent
 
 # --------------------------------- SERVICES --------------------------------- #
 
 # verification
 from verification import (
     #mail
-    create_mail_address,
     check_link_inbox,
     # phone
     get_phone_number,
@@ -38,4 +33,3 @@ q = queue.Queue()
 
 # create person
 person = create_person()
-

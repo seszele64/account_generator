@@ -1,37 +1,54 @@
-from yopmail import Yopmail
-from links import *
+from yopmail import YopmailManager
+from links import (get_link_from_mail)
 
-# check link in mail
-# link = check_link_inbox('twoja.mama@mymailbox.xxl.st', 'wolt')
-
-def create_mail_address(
-    name: str,
-    surname: str,
-    domain: str = 'yopmail.com'
+def create_mail_addres(
+    name: str = None,
+    surname: str = None
 ) -> str:
-    return f"{name}.{surname}@{domain}"
+    """
+    Creates a mail address for the given `name` using the Yopmail domain.
 
-def create_mail_addres_from_name(
-        name: 'Name'
-):
-    return create_mail_address(
-        name=name.first_name,
-        surname=name.last_name
-    )
+    Args:
+        name (str): The name to create the mail address for.
+        surname (str): The surname to create the mail address for.
 
+    Returns:
+        str: The mail address created for the given `name`.
 
-# look for link in mail
+    Example:
+        ```python
+        mail_address = create_mail_addres(name='John', surname='Doe')
+        print(mail_address)
+        ```
+    """
+    def format_name(name: str) -> str:
+        """
+        Formats a name by removing special characters and converting to lowercase.
+
+        Args:
+            name (str): The name to format.
+
+        Returns:
+            str: The formatted name.
+        """
+        import re
+        return re.sub('[^A-Za-z0-9]+', '', name).lower()
+    
+    name = format_name(name)
+    surname = format_name(surname)
+
+    return f"{name}.{surname}{YopmailManager().get_todays_domain()}"
+
 def check_link_inbox(
-    mail_address: str,
+    username: str,
     service_name: str,
     type: str = 'verification'
 ):
-    
     """
-    Checks the inbox of the specified `mail_address` for a link of the given `type` related to the `service_name`.
+    Checks the inbox of the specified `username` for a link of the given `type` related to the `service_name`.
 
     Args:
-        mail_address (str): The email address to check the inbox for.
+        username (str): The username of the mail address to check.
         service_name (str): The name of the service to retrieve the link from.
         type (str, optional): The type of link to retrieve. Defaults to 'verification'.
 
@@ -40,33 +57,16 @@ def check_link_inbox(
 
     Example:
         ```python
-        mail_address = "example@example.com"
-        service_name = "example_service"
-        link = check_link_inbox(mail_address, service_name, type='verification')
+        link = check_link_inbox(username='example', service_name='example_service', type='verification')
         if link:
             print(f"Verification link found: {link}")
         else:
             print("No verification link found.")
         ```
     """
+    mail_manager = YopmailManager()
 
-    yopmail = Yopmail(mail_address)
-    service = ServiceRegistry.get_service(service_name)
-
-    def mail_check(
-            mail: object,
-            type: str = 'verification'
-    ):
-        
-        if type == 'verification':
-            return service.get_verification_link(mail)
-        elif type == 'password':
-            return service.get_password_reset_link(mail)
-    
-    # iterate over all mails starting from last one until we find link
-    all_mails = yopmail.get_mail_ids()
-
-    for mail_id in all_mails:
-        mail = yopmail.get_mail_body(mail_id)
-        if (link := mail_check(mail)):
-            return link
+    if (mail := mail_manager.get_newest_mail_for_username(username)):
+        return get_link_from_mail(service_name, mail.html, type=type)
+    else:
+        return None
