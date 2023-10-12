@@ -68,8 +68,7 @@ class RegisterAccount(WebActions):
         
         # consents
         self.consents_selector = (By.CSS_SELECTOR, '[data-test-id^="CreateAccount.Consent"]')
-        
-        self.continue_button_selector = (By.CSS_SELECTOR, 'div[data-test-id="CreateAccount.Continue"]')
+        self.continue_button_selector = (By.CSS_SELECTOR, 'button[data-test-id="CreateAccount.Continue"]')
         self.error_field_locator = (By.CSS_SELECTOR, 'div[data-test-id="CreateAccount.SubmitError"]')
         self.confirm_sms_modal_selector = (By.CSS_SELECTOR, 'div[data-test-id="VerifyCode.CodeNotReceived"]')
     
