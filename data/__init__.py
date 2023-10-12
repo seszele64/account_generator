@@ -1,5 +1,5 @@
 from .random_info import create_person, Person, get_country_list
-from .real_info import random_password, random_user_agent
+from .real_info import random_user_agent
 from .database import conn, cursor
 
 _all_ = [

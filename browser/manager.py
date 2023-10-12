@@ -12,7 +12,11 @@ from selenium.webdriver.chrome.service import Service
 
 
 # import sister module -> /data/real_info/user_agent.py
-from data.real_info.user_agent import UserAgentManager
+from data.real_info.user_agent import generate_random_user_agent
+
+
+# global user agent
+global_user_agent = generate_random_user_agent
 
 class MyBrowser(webdriver.Chrome):
     # -------------------------------- constructor ------------------------------- #
@@ -30,7 +34,7 @@ class MyBrowser(webdriver.Chrome):
 
         # -------------------------------- user agent -------------------------------- #
 
-        self.user_agent = UserAgentManager().get_random_user_agent()
+        self.user_agent = global_user_agent
         
         # add user agent to options
         self.options.add_argument(f'user-agent={self.user_agent}')
@@ -71,9 +75,3 @@ class MyBrowser(webdriver.Chrome):
         self.options.add_argument(options)
 
     # -------------------------- quicker browser actions ------------------------- #
-
-# create global variable -> global_browser
-global_browser = MyBrowser().create_driver()
-
-# global user agent
-global_user_agent = MyBrowser().user_agent

@@ -8,11 +8,9 @@ import sys
 sys.path.append(".")
 
 # browser/__init__.py
-from browser import global_browser as browser, global_user_agent as user_agent
-from browser.actions import ClickAction, SendKeysAction, SelectDropdownOptionAction, NavigateAction
-
-# import Data
-# from data import Data
+# from browser import global_user_agent as user_agent,
+from browser.manager import MyBrowser
+from browser.actions import WebActions
 
 class ActionType(Enum):
     CLICK = "click"
@@ -21,7 +19,7 @@ class ActionType(Enum):
     NAVIGATE = "navigate"
 
 class Actions:
-    def __init__(self, browser: browser = None, **kwargs):
+    def __init__(self, browser: MyBrowser = None, **kwargs):
         self.browser = browser
         self.actions = []
 
@@ -42,8 +40,7 @@ class Actions:
         return self
 
     def select_action(self):
-        for i, action in enumerate(self.actions):
-            print(f"{i}: {action}")
+        self.print_actions()
         while True:
             try:
                 action_index = int(input("Select action: "))
@@ -54,6 +51,9 @@ class Actions:
             except ValueError:
                 print("Invalid input. Please enter a number.")
 
+    def print_actions(self):
+        for i, action in enumerate(self.actions):
+            print(f"{i}: {action}")
 
     def run(self):
         for action in self.actions:

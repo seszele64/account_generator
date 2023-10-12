@@ -17,11 +17,6 @@ class ServiceManager:
 def main(**kwargs):
     manager = ServiceManager()
 
-
-
-    # add services to the manager
-    manager.add_service()
-
     # select service 
     manager.select_service(Services.WOLT)
 

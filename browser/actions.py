@@ -1,61 +1,42 @@
-from .manager import global_browser, global_user_agent, MyBrowser
-from selenium.webdriver.common.by import By
+from .manager import MyBrowser
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-class Action:
-    def __init__(self, browser: MyBrowser):
-        self.browser = browser
+from enum import Enum
 
-    def find_element(self, by, value):
-        return self.browser.find_element(by, value)
+class ActionType(Enum):
+    CLICK = "click"
+    FILL = "fill"
+    SELECT_DROPDOWN_OPTION = "select_dropdown_option"
+    NAVIGATE = "navigate"
 
-    def find_elements(self, by, value):
-        return self.browser.find_elements(by, value)
+class WebActions:
+    def __init__(self, driver):
+        self.driver = driver
 
-    def execute(self):
-        raise NotImplementedError("Subclasses must override execute() method")
+    def navigate(self, url):
+        self.driver.get(url)
 
-class ClickAction(Action):
-    def __init__(self, browser: MyBrowser, by, value):
-        super().__init__(browser)
-        self.by = by
-        self.value = value
+    def click(self, locator):
+        self.wait_for_element(locator, 3)
+        self.driver.find_element(*locator).click()
 
-    def execute(self):
-        element = self.find_element(self.by, self.value)
-        element.click()
+    def input_text(self, locator, text):
+        self.wait_for_element(locator, 3)
+        element = self.driver.find_element(*locator)
+        element.clear()
+        element.send_keys(text)
 
-class SendKeysAction(Action):
-    def __init__(self, browser: MyBrowser, by, value, keys):
-        super().__init__(browser)
-        self.by = by
-        self.value = value
-        self.keys = keys
+    def wait_for_element(self, locator, timeout=30):
+        WebDriverWait(self.driver, timeout).until(
+            EC.presence_of_element_located(locator)
+        )
 
-    def execute(self):
-        element = self.find_element(self.by, self.value)
-        element.send_keys(self.keys)
-
-class SelectDropdownOptionAction(Action):
-    def __init__(self, browser: MyBrowser, by, value=None, text=None):
-        super().__init__(browser)
-        self.by = by
-        self.value = value
-        self.text = text
-
-    def execute(self):
-        dropdown = Select(self.find_element(self.by, self.value))
-        
-        if self.value is not None:
-            dropdown.select_by_value(self.value)
-
-        if self.text is not None:
-            dropdown.select_by_visible_text(self.text)
-
-class NavigateAction(Action):
-    def __init__(self, browser: MyBrowser, url):
-        super().__init__(browser)
-        self.url = url
-
-    def execute(self):
-        self.browser.get(self.url)
+    def select_dropdown_option(self, locator, value=None, text=None):
+        self.wait_for_element(locator, 5)
+        dropdown = Select(self.driver.find_element(*locator))
+        if value is not None:
+            dropdown.select_by_value(value)
+        if text is not None:
+            dropdown.select_by_visible_text(text)
