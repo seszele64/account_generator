@@ -1,10 +1,6 @@
 # manage mail -> mailactions
-from .main import (
-    check_link_inbox,
-    create_mail_addres
+from .mail_manager import (
+    MailManager,
+    MailLinkExtractor,
+    # ServiceLinksEnum
 )
-
-__all__ = [
-    'check_link_inbox',
-    'create_mail_addres'
-]

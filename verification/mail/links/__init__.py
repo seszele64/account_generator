@@ -1,1 +1,2 @@
-from .main import get_link_from_mail
+from .link_extractor import MailLinkExtractor, ServiceLinksEnum
+

@@ -1,6 +1,6 @@
 import json
 import requests
-from fivesim.errors import ErrorType, FiveSimError
+from .errors import ErrorType, FiveSimError
 from typing import Any, Callable, Dict
 
 

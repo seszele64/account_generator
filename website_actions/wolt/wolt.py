@@ -2,15 +2,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import TimeoutException
 
+from website_actions.base import BaseService
 
 import sys
+import time
+
 sys.path.append(".")
 
-from browser.actions import WebActions
+from browser.actions import BrowserActions
 from browser.manager import MyBrowser
 
-class CreateAccount(WebActions):
+class CreateAccount(BrowserActions):
     def __init__(self, driver):
         super().__init__(driver)
         self.visit_page_url = "https://wolt.com/en/"
@@ -21,8 +25,7 @@ class CreateAccount(WebActions):
         # error 
         # self.error_field_locator = (By.XPATH, "/html/body/div[7]/div/aside/div[2]/div/div[1]/div/div/div[2]/form/div[2]/div")
         self.error_field_locator = (By.CSS_SELECTOR, 'div[data-test-id="MethodSelect.EmailLoginError"]')
-
-        self.wait_for_button_resend_mail_locator = (By.XPATH, "/html/body/div[7]/div/aside/div[4]/div/div[1]/div/div/button/div[3]")
+        self.resend_mail_locator = (By.CSS_SELECTOR, "button[data-test-id='EmailSent.Resend']")
 
     def visit_page(self):
         self.navigate(self.visit_page_url)
@@ -41,15 +44,23 @@ class CreateAccount(WebActions):
         self.click(self.click_next_button_locator)
 
     def await_error(self, timeout=5):
-        if self.wait_for_element(self.error_field_locator, timeout):
-            return True
-        else:
+        try:
+            # If the error element is found within the timeout, return True
+            if self.wait_for_element(self.error_field_locator, timeout):
+                return True
+        except TimeoutException:
+            # If the error element is not found within the timeout, return False
             return False
+        return False
+
 
     def wait_for_button_resend_mail(self, timeout=30):
-        self.wait_for_element(self.wait_for_button_resend_mail_locator, timeout)
+        self.wait_for_element(self.resend_mail_locator, timeout)
 
-class RegisterAccount(WebActions):
+    def click_resend_mail(self):
+        self.click(self.resend_mail_locator)
+
+class RegisterAccount(BrowserActions):
     def __init__(self, driver):
         super().__init__(driver)
         self.confirm_cookies_button_selector = (By.XPATH, '/html/body/div[5]/div/div/div/button[2]')
@@ -148,8 +159,8 @@ class RegisterAccount(WebActions):
     def wait_for_verification_code_modal(self):
         self.wait_for_element(self.modal_selector, 5)
 
-    
-class Wolt:
+  
+class Wolt(BaseService):
 
     def __init__(self, driver: MyBrowser = None, **kwargs):
         self.driver = driver
@@ -164,6 +175,12 @@ class Wolt:
         if account_creation.await_error():
             raise ValueError("Error while creating account")
         account_creation.wait_for_button_resend_mail()
+        account_creation.click_resend_mail()
+        time.sleep(2)
+
+        # verify email
+        
+
 
     def register(self, url, country, first_name, last_name, country_code, phone_number, referral_code=""):
         account_registration = RegisterAccount(self.driver)
@@ -190,24 +207,26 @@ class Wolt:
         # wait for confirmation to appear
         account_registration.wait_for_verification_code_modal()
 
-# Usage:
-def test_create_account():
-    driver = MyBrowser().create_driver()
-    wolt = Wolt(driver)
-    wolt.create_account("test@maddafaka.com")
-    driver.quit()
 
-def test_register_account():
-    driver = MyBrowser().create_driver()
-    wolt = Wolt(driver)
-    wolt.register(
-        url = 'https://wolt.com/me/magic_login?email=m---%40sake.prout.be&email_hash=3ehGzx9hNwMb1ar4l_uYh9lPHnmJFfiyvJ9KIgzTsJM&token=-8Zp3xnggzB8ulG9UQ2UMaoZd1ftHtmIXY54qrC_jEY&new_user=true&attribution=%3Ab5f86f6c-626c-46b3-affb-df3ac0f09cf1%3A',
-        country="POL",
-        first_name="John",
-        last_name="Doe",
-        country_code="PL",
-        phone_number="520830290"
-    )
-    driver.quit()
+# # Usage:
+# def test_create_account():
+#     driver = MyBrowser().create_driver()
+#     wolt = Wolt(driver)
+#     wolt.create_account("test@maddafaka.com")
+#     driver.quit()
 
-test_register_account()
+# def test_register_account():
+#     driver = MyBrowser().create_driver()
+#     wolt = Wolt(driver)
+#     wolt.register(
+#         url = 'https://wolt.com/me/magic_login?email=m---%40sake.prout.be&email_hash=3ehGzx9hNwMb1ar4l_uYh9lPHnmJFfiyvJ9KIgzTsJM&token=-8Zp3xnggzB8ulG9UQ2UMaoZd1ftHtmIXY54qrC_jEY&new_user=true&attribution=%3Ab5f86f6c-626c-46b3-affb-df3ac0f09cf1%3A',
+#         country="POL",
+#         first_name="John",
+#         last_name="Doe",
+#         country_code="PL",
+#         phone_number="520830290"
+#     )
+
+#     driver.quit()
+
+# test_register_account()

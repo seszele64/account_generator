@@ -1,5 +1,5 @@
-from .manager import global_user_agent
+from .manager import MyBrowser
 from .actions import (
-    WebActions,
+    BrowserActions,
     ActionType
 )

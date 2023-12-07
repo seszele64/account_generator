@@ -1,11 +1,10 @@
 # phone
-from phone import get_phone_number, get_verification_code
+from .phone import *
 
 # mail
-from mail import check_link_inbox
+from .mail import *
 
-_all__ = [
-    "get_phone_number",
-    "get_verification_code",
-    "check_link_inbox"
-]
+class Verifier:
+
+    def __init__(self, config):
+        self.config = config

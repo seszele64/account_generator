@@ -1,5 +1,4 @@
 # database
-import database
 # random_info
 import random_info
 # real_info
@@ -18,7 +17,15 @@ def real_data():
     password = real_info.get_random_password()
     return user_agent, password
 
-print(random_person_data())
-print(real_data())
+
+
+# print(random_person_data())
+# print(real_data())
 
 # Database
+from database import *
+
+# test
+# generated_data_id_as_foreign_key(insert_email_verification_data('dd@gmail.com', 'https://www.google.com', 'pending', '2020-01-01', '2020-01-01'))
+
+

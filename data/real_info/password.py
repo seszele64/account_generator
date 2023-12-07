@@ -13,7 +13,7 @@ class CharacterLimits:
 # random string generator
 class RandomStringManager(
     ):
-    def __init__(self, length=None, uppercase=None, lowercase=None, numbers=None, special=None):
+    def __init__(self, length=(12, 16), uppercase=(1,2), lowercase=(1,2), numbers=(1,2), special=(1,2)):
         self.length = CharacterLimits(*length)
         self.uppercase = CharacterLimits(*uppercase)
         self.lowercase = CharacterLimits(*lowercase)
@@ -101,13 +101,3 @@ class RandomStringManager(
 
         return password
     
-
-# call -> reproduces string
-def get_random_string(length=(8, 16), uppercase=(1, 4), lowercase=(1, 4), numbers=(1, 4), special=(1, 4)):
-    return RandomStringManager(
-        length=length,
-        uppercase=uppercase,
-        lowercase=lowercase,
-        numbers=numbers,
-        special=special
-    ).generate()

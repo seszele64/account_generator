@@ -1,6 +1,6 @@
-from .main import conn, cursor
+from .main import database_manager
 
-__all__ = [
-    'conn',
-    'cursor'
-]
+# __all__ = [
+#     'conn',
+#     'cursor'
+# ]

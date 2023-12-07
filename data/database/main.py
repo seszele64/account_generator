@@ -1,10 +1,9 @@
-from . import database
-from . import db_init
+# from . import database
+# from . import db_init
+
+from .database import DatabaseManager
 
 DATABASE_NAME = 'accountgenerator'
 
-# Initialize the database tables
-db_init.init_database(DATABASE_NAME)
-
-# You can access the imported modules using the module name as a prefix
-conn, cursor = database.Database.get_connection(DATABASE_NAME)
+# create database manager
+database_manager = DatabaseManager(DATABASE_NAME)

@@ -5,6 +5,21 @@ from sqlalchemy.ext.declarative import declarative_base
 # Create a declarative base class for your database models
 BasePostgreSQL = declarative_base()
 
+# top - down
+
+
+# define table for account information
+class AccountInformationPostgreSQL(BasePostgreSQL):
+    __tablename__ = 'account_information'
+    account_id = Column(Integer, primary_key=True)
+    generated_data_id = Column(Integer, ForeignKey('generated_data.id'))
+    verification_data_id = Column(Integer, ForeignKey('verification_data.verification_id'))
+
+    # Define relationships
+    generated_data = relationship("GeneratedDataPostgreSQL")
+    verification_data = relationship("VerificationDataPostgreSQL")
+
+
 # Define the "generated_data" table for PostgreSQL
 class GeneratedDataPostgreSQL(BasePostgreSQL):
     __tablename__ = 'generated_data'
@@ -21,26 +36,51 @@ class GeneratedDataPostgreSQL(BasePostgreSQL):
     zip_code = Column(String)
     city = Column(String)
 
-    # Real data
+    # other data
     email = Column(String)
     password = Column(String)
     user_agent = Column(String)
 
+
+
+# create table for sms verification
+class SMSVerificationPostgreSQL(BasePostgreSQL):
+    __tablename__ = 'sms_verification'
+
+    id = Column(Integer, primary_key=True)
+    phone_number = Column(String)
+    verification_code = Column(String)
+    status = Column(String)
+    created_at = Column(Date)
+    updated_at = Column(Date)
+
+
+
+
+# create table for email verification
+class EmailVerificationPostgreSQL(BasePostgreSQL):
+    __tablename__ = 'email_verification'
+
+    id = Column(Integer, primary_key=True)
+    email = Column(String)
+    verification_link = Column(String)
+    status = Column(String)
+    created_at = Column(Date)
+    updated_at = Column(Date)
+
+
+
 # Define the "verification_status" table for PostgreSQL
-class VerificationStatusPostgreSQL(BasePostgreSQL):
-    __tablename__ = 'verification_status'
+class VerificationDataPostgreSQL(BasePostgreSQL):
+    __tablename__ = 'verification_data'
 
-    id = Column(Integer, primary_key=True)
-    phone_verification = Column(String)
-    email_verification = Column(String)
+    verification_id = Column(Integer, primary_key=True)
+    status = Column(String)
 
-# Define the "connection" table to connect "generated_data" and "verification_status" for PostgreSQL
-class ConnectionPostgreSQL(BasePostgreSQL):
-    __tablename__ = 'connection'
+    # ids of the verification services
+    sms_verification_id = Column(Integer, ForeignKey('sms_verification.id'))
+    email_verification_id = Column(Integer, ForeignKey('email_verification.id'))
 
-    id = Column(Integer, primary_key=True)
-    generated_data_id = Column(Integer, ForeignKey('generated_data.id'))
-    verification_status_id = Column(Integer, ForeignKey('verification_status.id'))
-
-    generated_data = relationship('GeneratedDataPostgreSQL', backref='connections')
-    verification_status = relationship('VerificationStatusPostgreSQL', backref='connections')
+    # relationship
+    sms_verification = relationship(SMSVerificationPostgreSQL)
+    email_verification = relationship(EmailVerificationPostgreSQL)

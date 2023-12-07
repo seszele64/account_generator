@@ -2,7 +2,7 @@
 
 
 from flask import Flask, jsonify, request, Response
-from main import table, create_person
+from main2 import table, create_person
 from random_info.datatypes import Person
 import asyncio
 import queue

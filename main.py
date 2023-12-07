@@ -1,35 +1,41 @@
-# Comments:
-# Used packages: SQLAlchemy, Selenium, BeautifulSoup, dataclasses, datetime, re
+from account_creation import AccountCreator, AccountSite
 
-# imports from random_info package -> __init__.py
+# let user choose which account to create
 
-# ----------------------------------- data ----------------------------------- #
+def choose_service():
+    print("Available services:")
+    for service in AccountSite:
+        print(service.name)
+    
+    service_name = input("Enter the service name: ")
+    try:
+        chosen_service = AccountSite[service_name]
+        print(f"You have chosen {chosen_service.name}")
+    except KeyError:
+        print("Invalid service name")
 
-from data import create_person, get_random_string, random_user_agent
+    # run account creator
+    account_creator = chosen_service.value()
+    account_creator.create_account()
 
-# --------------------------------- SERVICES --------------------------------- #
+    
 
-# verification
-from verification import (
-    #mail
-    check_link_inbox,
-    # phone
-    get_phone_number,
-    get_verification_code
-)
+def choose_account_site():
+    print("Available account sites:")
+    for site in AccountSite:
 
-# asynchronic programming
-import asyncio
-import queue
-import threading
+        print(f"{site.value}: {site.name}")
+    
+    while True:
+        try:
+            choice = int(input("Enter the number corresponding to the desired account site: "))
+            account_site = AccountSite(choice)
+            break
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
+        except IndexError:
+            print("Invalid input. Please enter a number within the range of available account sites.")
+    
+    return account_site
 
-# run in thread
-def run_in_thread(func, *args):
-    thread = threading.Thread(target=func, args=args)
-    thread.start()
-
-# create queue
-q = queue.Queue()
-
-# create person
-person = create_person()
+choose_service()

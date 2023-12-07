@@ -1,5 +1,5 @@
 import dateutil.parser
-from fivesim.enums import(
+from .enums import(
     ActivationProduct,
     Category,
     Country,
@@ -7,7 +7,7 @@ from fivesim.enums import(
     Operator,
     Status
 )
-from fivesim.response import(
+from .response import(
     CountryInformation,
     Order,
     OrdersHistory,
